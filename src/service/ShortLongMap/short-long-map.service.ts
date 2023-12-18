@@ -25,28 +25,37 @@ export class ShortLongMapService {
    * @return {*}
    */
   async generateShortLongMap(originalUrl: string) {
+    // 如果原始URL已存在，则直接返回短码
+    const existMap = await this.entitiesManager.findOneBy(ShortLongMap, {
+      originalUrl,
+    });
+
+    if (existMap) {
+      return existMap.shortUrl;
+    }
+
     // 从 UniqueCode 表中取出一条未使用的短码
-    let uniqueCode = await this.entitiesManager.findOneBy(UniqueCode, {
+    let uniqueMap = await this.entitiesManager.findOneBy(UniqueCode, {
       status: 0,
     });
 
     // 如果不存在，则重新生成
-    if (!uniqueCode) {
-      uniqueCode = await this.uniqueCodeService.generateCode(true);
+    if (!uniqueMap) {
+      uniqueMap = await this.uniqueCodeService.generateCode(true);
     }
 
     // 插入到 ShortLongMap 表中
     const map = new ShortLongMap();
-    map.shortUrl = uniqueCode.code;
+    map.shortUrl = uniqueMap.code;
     map.originalUrl = originalUrl;
 
     await this.entitiesManager.insert(ShortLongMap, map);
     // 更新 UniqueCode 表中对应的短码状态为已使用
-    await this.entitiesManager.update(UniqueCode, uniqueCode.id, {
+    await this.entitiesManager.update(UniqueCode, uniqueMap.id, {
       status: 1,
     });
 
-    return uniqueCode.code;
+    return uniqueMap.code;
   }
 
   /**

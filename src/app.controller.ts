@@ -42,15 +42,14 @@ export class AppController {
   @SkipTransform()
   @Redirect() // Redirect中省略了参数默认 statusCode 为302重定向
   async redirectOriginalUrl(@Param('code') code: string) {
-    const originalUrl = await this.shortLongMapService.getOriginalUrl(code);
+    const url = await this.shortLongMapService.getOriginalUrl(code);
 
-    if (!originalUrl) {
-      throw new BadRequestException('短码不存在');
+    if (!url) {
+      throw new BadRequestException('短链码不存在');
     }
 
     return {
-      url: originalUrl,
-      statusCOde: 302,
+      url,
     };
   }
 }
