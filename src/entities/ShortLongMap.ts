@@ -3,7 +3,6 @@ import {
   CreateDateColumn,
   Entity,
   PrimaryGeneratedColumn,
-  UpdateDateColumn,
 } from 'typeorm';
 
 @Entity()
@@ -26,12 +25,16 @@ export class ShortLongMap {
   @CreateDateColumn({
     comment: '创建时间',
     type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP',
+    precision: 0,
   })
-  createTime: Date;
+  create_time: Date;
 
-  @UpdateDateColumn({
-    comment: '创建时间',
+  @Column({
+    comment: '更新时间',
     type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP',
+    onUpdate: 'CURRENT_TIMESTAMP',
   })
-  updateTime: Date;
+  update_time: Date;
 }

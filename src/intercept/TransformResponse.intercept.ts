@@ -8,10 +8,21 @@ import { Reflector } from '@nestjs/core';
 import { Observable, map } from 'rxjs';
 import { SKIP_TRANSFORM } from 'src/decorator/SkipTransform.decorator';
 
+export type TransformResponse<T> = {
+  code: number;
+  data: T;
+  msg: string;
+};
+
 @Injectable()
-export class TransformResponseInterceptor implements NestInterceptor {
+export class TransformResponseInterceptor<T>
+  implements NestInterceptor<T, TransformResponse<T>>
+{
   constructor(private reflector: Reflector) {}
-  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+  intercept(
+    context: ExecutionContext,
+    next: CallHandler,
+  ): Observable<TransformResponse<T>> {
     const skipTransform = this.reflector.get<boolean>(
       SKIP_TRANSFORM,
       context.getHandler(),
@@ -19,7 +30,8 @@ export class TransformResponseInterceptor implements NestInterceptor {
     if (skipTransform) {
       return next.handle();
     }
-    const code = context.switchToHttp().getResponse().statusCode;
+    const code = context.switchToHttp().getResponse()
+      .statusCode as TransformResponse<T>['code'];
     return next.handle().pipe(
       map((data) => {
         console.log(
